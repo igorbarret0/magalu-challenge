@@ -6,7 +6,11 @@ import com.challenge.magalums.entity.Status;
 import com.challenge.magalums.repository.NotificationRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.ToDoubleBiFunction;
 
 @Service
 public class NotificationService {
@@ -36,8 +40,26 @@ public class NotificationService {
             foundNotification.get().setStatus(Status.Values.CANCELED.toStatus());
             notificationRepository.save(foundNotification.get());
         }
+    }
 
+    public void checkAndSendPendingNotifications(LocalDateTime dateTime) {
 
+        var notifications = notificationRepository.findByStatusInAndDateTimeBefore(List.of(
+                Status.Values.PENDING.toStatus(),
+                Status.Values.ERROR.toStatus()
+        ), dateTime);
+
+        notifications.forEach(sendNotification());
+    }
+
+    private Consumer<Notification> sendNotification() {
+
+        return n -> {
+          // TODO - realize the send notification
+
+            n.setStatus(Status.Values.SUCCESS.toStatus());
+            notificationRepository.save(n);
+        };
     }
 
 }
