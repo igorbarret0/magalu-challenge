@@ -2,18 +2,17 @@ package com.challenge.magalums.controller;
 
 
 import com.challenge.magalums.dtos.ScheduleNotificationDto;
+import com.challenge.magalums.entity.Notification;
 import com.challenge.magalums.service.NotificationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/notification")
 public class NotificationController {
 
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
 
     public NotificationController(NotificationService notificationService) {
         this.notificationService = notificationService;
@@ -25,6 +24,20 @@ public class NotificationController {
         notificationService.scheduleNotification(requestDto);
 
         return ResponseEntity.accepted().build();
+    }
+
+    @GetMapping("/{notificationId}")
+    public ResponseEntity<Notification> getNotification(@PathVariable(name = "notificationId")
+                                                            Long notificationId) {
+
+        var notification = notificationService.findById(notificationId);
+
+        if (notification.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return new ResponseEntity<>(notification.get(), HttpStatus.FOUND);
+
     }
 
 }
